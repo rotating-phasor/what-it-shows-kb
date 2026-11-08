@@ -1,0 +1,77 @@
+---
+layout: runbook
+title: '#4471 split: three date problems, three fixes'
+owner: support desk
+status: open
+reviewed: 2026-11-07
+signature: 'v1.eyJzdWIiOiI5MTEiLCJhdWQiOiJjaGFsbGVuZ2U6d2hhdC1pdC1zaG93cyIsImlhdCI6MTc5NDExOTg1NCwiZXhwIjoxNzk0MjA2MjU0fQ.MaHRScZdMD_Af-DRCuEnn8iIO-Hm3qLpL9Z6WeifPtY'
+---
+
+<script>
+  import ProblemTable from '#lib/kb/ProblemTable.svelte';
+  import QueueTimeline from '#lib/kb/QueueTimeline.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+
+  const repo = 'https://github.com/rotating-phasor/what-it-shows-kb/issues';
+  const issues = { parser: `${repo}/1`, hint: `${repo}/2`, shift: `${repo}/3` };
+</script>
+
+#4471 is marked known, with one fix queued: make the parser read the tenant's date order. That fix
+closes only the first row below. The other two rows need their own fixes, and until now they had no
+ticket.
+
+<Callout kind="warn">
+Do not close #4471 when the parser fix ships. Close each ticket below on its own fix.
+</Callout>
+
+## What #4471 holds
+
+<ProblemTable ticket={4471} {issues} />
+
+Each report is placed by its tenant, the booking form that tenant runs, and the channel the report
+came in on (`causes.ts`, `problems.ts`). Intake tags and subject lines do not decide it.
+
+## The three problems
+
+### `parser`: dates read month first
+
+The shared parser reads every date as MM/DD. Every tenant in #4471 writes the day first, so any date
+with a day of 12 or less swaps: 7 April becomes 4 July. Reports come from every channel and every
+tenant. This is the fix already queued under #4471.
+
+### `hint`: booking-v3 tells day-first tenants to type MM/DD
+
+The booking-v3 form prints `MM/DD/YYYY` under its date field. People type what the hint says. The form
+then reads the date the tenant's way, day first, and the date swaps. The parser fix does not touch
+this: the form needs its hint to follow the tenant's locale. Only form reports from booking-v3
+tenants show it.
+
+### `shift`: the date moves by one day
+
+These reports are not a swap. Tuesday 12 May shows as Monday 11 May. A Lisbon client sees Tuesday and
+a Toronto client sees Monday for the same meeting. One invite arrived before the booking was made.
+That points at a time-zone conversion of the invite date, not at date order. The desk had noted these
+reports as a one-day move (`desk-notes.json`) but filed them under the parser by tenant.
+
+## Since April
+
+<QueueTimeline ticket={4471} />
+
+## Why one ticket hid three
+
+- Decision [0001](/kb/decisions/0001-dedupe-by-subject) merges on the subject line. Reporters describe
+  the symptom, "wrong day", and every problem here has the same symptom. The table above counts how many
+  subject lines span more than one problem.
+- Intake tags come from the reporter's browser, not from the tenant. They split the queue wrongly in
+  both directions.
+- A report that does not fit the headline (a one-day move is not a swap) was footnoted instead of
+  getting a ticket.
+
+## For the desk
+
+- For date reports, place a report by tenant, form and channel before you merge it.
+- A report whose symptom differs from the ticket's headline gets its own ticket, even if only a few
+  reports share it.
+
+<RenderStamp {signature} />
