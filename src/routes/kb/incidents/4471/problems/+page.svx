@@ -17,12 +17,22 @@ signature: 'v1.eyJzdWIiOiI5MTEiLCJhdWQiOiJjaGFsbGVuZ2U6d2hhdC1pdC1zaG93cyIsImlhd
   const issues = { parser: `${repo}/1`, hint: `${repo}/2`, shift: `${repo}/3` };
 </script>
 
-#4471 is marked known, with one fix queued: make the parser read the tenant's date order. That fix
-closes only the first row below. The other two rows need their own fixes, and until now they had no
-ticket.
+#4471 was marked known, with one fix queued: make the parser read the tenant's date order. That fix
+closes only the first row below. The other two rows needed their own tickets.
+
+## Where each problem stands
+
+Engineering closed #4471 on 5 October 2026.
+
+| problem | status | ticket |
+|---|---|---|
+| `parser` | fixed: `fix(dates): parse dd/mm for eu locales` | [#1](https://github.com/rotating-phasor/what-it-shows-kb/issues/1), closed |
+| `hint` | won't fix: the booking-v3 form is retired | [#2](https://github.com/rotating-phasor/what-it-shows-kb/issues/2), closed |
+| `shift` | **open**: no fix, and the engineering update does not mention it | [#3](https://github.com/rotating-phasor/what-it-shows-kb/issues/3), open |
 
 <Callout kind="warn">
-Do not close #4471 when the parser fix ships. Close each ticket below on its own fix.
+#4471 is closed, but the one-day move is not fixed. Merge new one-day reports into #3, not into
+#4471, and do not file them under the parser.
 </Callout>
 
 ## What #4471 holds
