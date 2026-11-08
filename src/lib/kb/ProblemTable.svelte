@@ -11,8 +11,10 @@
   const split = $derived(splitTicket(reports as Report[], ticket, tenantOf, notes.oneDayMove));
   const subjects = $derived(subjectsAcross(split.groups));
   const shared = $derived(subjects.filter((s) => s.problems.length > 1));
-  // Intake tags only know `parser` and `hint`; count a report as mistagged when its tag is not its problem.
-  const mistagged = $derived(split.groups.flatMap((g) => g.reports.filter((r) => r.meta.intakeTag !== g.problem)).length);
+  // Intake tags only know `parser` and `hint`; a report is mistagged when its tag is not the cause it is filed under.
+  const filed = $derived(split.groups.filter((g) => g.problem !== 'shift'));
+  const mistagged = $derived(filed.flatMap((g) => g.reports.filter((r) => r.meta.intakeTag !== g.problem)).length);
+  const shift = $derived(split.groups.find((g) => g.problem === 'shift'));
   const list = (n: Record<string, number>) =>
     Object.entries(n)
       .sort((a, b) => b[1] - a[1])
@@ -45,8 +47,14 @@
   </tbody>
 </table>
 
+{#if shift}
+  <p class="note">
+    The {shift.reports.length} <code>shift</code> reports are also counted under the cause they are filed under
+    by tenant, the way the desk counts them, so the rows add up to more than {split.reports.length}.
+  </p>
+{/if}
 <p class="note">
-  {mistagged} of {split.reports.length} reports carry an intake tag that is not their problem. Intake tags
+  {mistagged} of {split.reports.length} reports carry an intake tag that is not the cause they are filed under. Intake tags
   come from the reporter's browser; the problem comes from the tenant, its form and the channel.
 </p>
 <p class="note">

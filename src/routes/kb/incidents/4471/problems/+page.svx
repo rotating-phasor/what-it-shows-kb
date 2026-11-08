@@ -51,8 +51,9 @@ tenants show it.
 
 These reports are not a swap. Tuesday 12 May shows as Monday 11 May. A Lisbon client sees Tuesday and
 a Toronto client sees Monday for the same meeting. One invite arrived before the booking was made.
-That points at a time-zone conversion of the invite date, not at date order. The desk had noted these
-reports as a one-day move (`desk-notes.json`) but filed them under the parser by tenant.
+That points at a time-zone conversion of the invite date, not at date order. The desk noted these
+reports as a one-day move (`desk-notes.json`) and filed them under the parser by tenant. The table
+counts them in both places, the way the desk counts, but only the `shift` ticket fixes them.
 
 ## Since April
 

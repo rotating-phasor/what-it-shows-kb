@@ -1,6 +1,8 @@
 // The problems inside a big ticket, one per fix. causes.ts tells `parser` from `hint` by tenant;
 // this file adds the reports the desk read as a one-day move (desk-notes.json). Those are not a
 // flipped date at all: the day moves by one, so they are a third problem with a fix of their own.
+// Counted the desk's way: a one-day report stays counted where it is filed (by tenant) and is
+// counted again under `shift`.
 import { causeOf, uniqueById, type Report, type Tenant } from '#lib/kb/causes';
 
 export type Problem = 'parser' | 'hint' | 'shift' | 'unplaced';
@@ -24,9 +26,10 @@ export const PROBLEMS: Record<Problem, { title: string; symptom: string }> = {
   },
 };
 
-export function problemOf(r: Report, t: Tenant | undefined, shiftIds: readonly string[]): Problem {
-  if (shiftIds.includes(r.id)) return 'shift';
-  return causeOf(r, t) ?? 'unplaced';
+// Every problem a report counts toward: where it is filed, and `shift` if the desk read it as a one-day move.
+export function problemsOf(r: Report, t: Tenant | undefined, shiftIds: readonly string[]): Problem[] {
+  const filed: Problem = causeOf(r, t) ?? 'unplaced';
+  return shiftIds.includes(r.id) ? [filed, 'shift'] : [filed];
 }
 
 export type ProblemGroup = {
@@ -51,8 +54,7 @@ export function splitTicket(
   const reports = uniqueById(all).filter((r) => r.mergedInto === ticket);
   const by = new Map<Problem, Report[]>();
   for (const r of reports) {
-    const p = problemOf(r, tenantOf(r), shiftIds);
-    by.set(p, [...(by.get(p) ?? []), r]);
+    for (const p of problemsOf(r, tenantOf(r), shiftIds)) by.set(p, [...(by.get(p) ?? []), r]);
   }
   const groups = [...by.entries()]
     .map(([problem, rs]) => {
